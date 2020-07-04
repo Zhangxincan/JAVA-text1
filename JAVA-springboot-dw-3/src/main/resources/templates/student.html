@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+</head>
+<body>
+<div id="ctx">
+	<h4 @click="toinsert()">批量增加</h4>
+	<table class="table table-striped">
+ 		<tr>
+ 			<th><input type="checkbox" v-model="checkzhi"></th>
+ 			<th>编号</th>
+ 			<th>姓名</th>
+ 			<th>年龄</th>
+ 			<th>班级</th>
+ 		</tr>
+ 		<tr v-for="item in page.list">
+ 			<td><input type="checkbox" v-model="checklist" :value="item.id"></td>
+ 			<td>{{item.id}}</td>
+ 			<td>{{item.name}}</td>
+ 			<td>{{item.age}}</td>
+ 			<td>{{item.claname}}</td>
+ 		</tr>
+	</table>
+	<nav aria-label="...">
+  <ul class="pager">
+    <li @click="findByPage(1)"><a href="javascript:void(0)">首页</a></li>
+    <li @click="findByPage(page.prePage)"><a href="javascript:void(0)">上一页</a></li>
+     <li @click="findByPage(page.nextPage)"><a href="javascript:void(0)">下一页</a></li>
+      <li @click="findByPage(page.pages)"><a href="javascript:void(0)">尾页</a></li>
+  </ul>
+</nav>
+<div class="modal" tabindex="-1" role="dialog" id="insertMt">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">学生增加</h4>
+      </div>
+      <div class="modal-body">
+	      <div	class="form-inline" >
+	     		 <div class="form-group">
+	   		 		<label for="exampleInputEmail1">班级名称</label>
+	   				 <input type="text" class="form-control" id="exampleInputEmail1" v-model="clazz.clazzname">
+	  			</div>
+	  			<button type="button" class="btn btn-info" @click="tianjiaxuesheng">添加学生</button>
+	      </div><br><br>
+	      <div class="form-inline" v-for="item in stulist">
+			  <div class="form-group">
+			    <label for="exampleInputName2">学生姓名</label>
+			    <input type="text" class="form-control" id="exampleInputName2" v-model="item.name">
+			  </div>
+			  <div class="form-group">
+			    <label for="exampleInputEmail2">学生年龄</label>
+			    <input type="text" class="form-control" id="exampleInputEmail2" v-model="item.age">
+			  </div>
+			  <br><br>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-primary" @click="insert()">添加</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+<script type="text/javascript" th:src="@{/js/jquery-1.12.4.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/vue.js}"></script>
+<script>
+	var vm=new Vue({
+		el:"#ctx",
+		data(){
+			return {
+				page:{
+					
+				},
+				checkzhi:false,
+				checklist:[],
+				stulist:[],
+				clazz:{}
+			}
+		},methods:{
+			findByPage(dangqianyemian){
+				var that=this;
+				$.ajax({
+					url:"[[@{/student/findByPage}]]",
+					data:{
+						dangqianyemian:dangqianyemian
+					},success:function(res){
+						that.page=res;
+						console.log(that.page);
+					}
+				})
+			},toinsert(){
+				this.stulist=[];
+				this.clazz={};
+				$("#insertMt").modal("show");
+			},tianjiaxuesheng(){
+				this.stulist.push({});
+			},insert(){
+				var that=this;
+				this.clazz.list=this.stulist;
+				var str=JSON.stringify(this.clazz);
+				$.ajax({
+					url:"[[@{/student/insert}]]",
+					data:str,
+					type:"post",
+					contentType:"application/json;charset=utf-8",
+					success:function(res){
+						alert(res);
+						that.findByPage(1);
+					}
+				})
+			}
+		},created(){
+			this.findByPage(1);
+		},watch:{
+			checkzhi(value){
+				if(value){
+					this.checklist=this.page.list.map(item=>item.id);
+				}else{
+					this.checklist=[];
+				}
+			}
+		}
+	})
+</script>
+</body>
+</html>
