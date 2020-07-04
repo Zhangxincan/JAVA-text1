@@ -43,7 +43,7 @@ public class StudentService {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		System.out.println("我草你妈");
+		System.out.println("我草你妈杂种");
 		return "增加失败";
 	}
 }
