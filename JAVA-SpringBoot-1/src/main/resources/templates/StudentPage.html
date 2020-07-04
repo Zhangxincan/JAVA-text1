@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+</head>
+<body>
+<div id="ctx">
+	<div class="container-fluid">
+	<h4 @click="remove()">批量删除</h4>
+	<h4 @click="insertModal()">批量增加</h4>
+		<table class="table table-bordered">
+			<tr>
+				<th><input type="checkbox" v-model="checkzt">全选</th>
+				<th>编号</th>
+				<th>姓名</th>
+				<th>年龄</th>
+				<th>班级</th>
+				<th>操作</th>
+			</tr>
+			<tr v-for="item in page.list">
+				<td><input type="checkbox" v-model="checklist" v-bind:value="item.stuid"></td>
+				<td>{{item.stuid}}</td>
+				<td>{{item.stuname}}</td>
+				<td>{{item.stuage}}</td>
+				<td>{{item.clz.clname}}</td>
+				<td><span @click="toupdate(item.clid)">修改</span></td>
+			</tr>
+		</table>
+		<ul class="pager">
+			  	 <li><a href="javascrip:void(0)" @click="findByPage(1)">首页</a></li>
+			    <li><a href="javascrip:void(0)" @click="findByPage(page.prePage)">上一页</a></li>
+			    <li><a href="javascript:void(0)"@click="findByPage(page.nextPage)">下一页</a></li>
+			    <li><a href="javascrip:void(0)"@click="findByPage(page.pages)">尾页</a></li>
+		</ul>
+			<div id="createModal" class="modal">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3>班级添加</h3>
+						</div>
+						<div class="modal-body">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<label class="col-xs-2 control-label">班级名称：</label>
+									<div class="col-xs-10">
+										<input class="form-control" v-model="clazz.clname">
+									</div>
+								</div>
+							</div>
+							<div class="form-inline">
+									<p>学生信息<button @click="createStu" class="btn btn-default">增加</button></p>
+									<div v-for="item in clazz.list">
+										<div class="form-group">
+											<label class="control-label">学生名称：</label>
+											<input  class="form-control" v-model="item.stuname">
+										</div>
+										<div class="form-group">
+											<label class="control-label">学生年龄：</label>
+											<input class="form-control" v-model="item.stuage">
+										</div>
+										
+										<br><br>
+									</div>
+								</div>
+						</div>
+						<div class="modal-footer">
+							<button class="btn btn-danger" @click="colsemodal('createModal')">关闭</button>
+							<button class="btn btn-primary" @click="insert()">保存</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="updateModal" class="modal">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h3>班级修改</h3>
+						</div>
+						<div class="modal-body">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<label class="col-xs-2 control-label">班级名称：</label>
+									<div class="col-xs-10">
+										<input class="form-control" v-model="xgclazz.clname">
+									</div>
+								</div>
+							</div>
+							<div class="form-inline">
+									<p>学生信息<button @click="updateStu" class="btn btn-default">增加</button></p>
+									<div v-for="item in xgclazz.list">
+										<div class="form-group">
+											<label class="control-label">学生名称：</label>
+											<input  class="form-control" v-model="item.stuname">
+										</div>
+										<div class="form-group">
+											<label class="control-label">学生年龄：</label>
+											<input class="form-control" v-model="item.stuage">
+										</div>
+										
+										<br><br>
+									</div>
+								</div>
+						</div>
+						<div class="modal-footer">
+							<button class="btn btn-danger" @click="colsemodal('createModal')">关闭</button>
+							<button class="btn btn-primary" @click="update()">保存</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	</div>
+</div>
+<script type="text/javascript" th:src="@{/js/jquery-1.12.4.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/vue.js}"></script>
+<script type="text/javascript">
+	var vm=new Vue({
+		el:"#ctx",
+		data(){
+			return {
+				page:{},
+				checklist:[],
+				checkzt:false,
+				clazz:{
+					list:[]
+				},xgclazz:{
+					list:[]
+				}
+			}
+		},methods:{
+			findByPage(dangqianyemian){
+				var that=this;
+				
+				$.ajax({
+					url:"[[@{/StudentPage/findByPage}]]",
+					data:{
+						dangqianyemian:dangqianyemian
+					},success:function(res){
+						that.page=res;
+					}
+				});
+			},remove(){
+				var that=this;
+				var checklist=this.checklist.join(",");
+				$.ajax({
+					url:"[[@{/StudentPage/remove}]]",
+					data:{
+						checklist:checklist
+					},success:function(res){
+						alert(res);
+						that.checkzt=false;
+						that.findByPage(1);
+					}
+				})
+			},insertModal(){
+				this.clazz={list:[]};
+				$("#createModal").modal("show");
+			},createStu(){
+				this.clazz.list.push({});
+			},colsemodal(value){
+				$("#"+value).modal("hide");
+			},insert(){
+				var that=this;
+				var str=JSON.stringify(this.clazz);
+				$.ajax({
+					url:"[[@{/clazz/insert}]]",
+					data:str,
+					contentType:"application/json;charset=utf-8",
+					type:"post",
+					success:function(res){
+						alert(res);
+						that.findByPage(1);
+						$("#createModal").modal("hide");
+					}
+				});
+			},toupdate(clid){
+				var that=this;
+				$.ajax({
+					url:"[[@{/clazz/findById}]]",
+					data:{
+						clid:clid
+					},type:"post",
+					success:function(res){
+						that.xgclazz=res;
+						$("#updateModal").modal("show");
+					}
+				});
+			},updateStu(){
+				this.xgclazz.list.push({});
+			},update(){
+				var str=JSON.stringify(this.xgclazz);
+				var that=this;
+				$.ajax({
+					url:"[[@{/clazz/update}]]",
+					data:str,
+					type:"post",
+					contentType:"application/json;charset=utf-8",
+					success:function(res){
+						alert(res);
+						that.findByPage(1);
+					}
+				});
+			}
+		},created(){
+			this.findByPage(1);
+		},watch:{
+			checkzt(value){
+				if(value){
+					this.checklist=this.page.list.map(item=>item.stuid);
+				}else{
+					this.checklist=[];
+				}
+			}
+		}
+	});
+</script>
+</body>
+</html>
