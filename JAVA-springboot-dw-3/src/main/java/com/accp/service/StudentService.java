@@ -43,7 +43,7 @@ public class StudentService {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		System.out.println("我爱你中国");
+		System.out.println("我草你妈");
 		return "增加失败";
 	}
 }
